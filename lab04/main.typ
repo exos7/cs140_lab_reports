@@ -14,13 +14,65 @@
   \
   #enum(numbering:"(a)", spacing: 10pt)[
     Explain how the `main` function of xv6 is able to context switch into the `init` process by going through relevant function calls.
+    #showybox(frame: (body-color: luma(80%)))[
+      *Answer:* the `main` function will call different functions to initialize the kernel. It will then run `userinit()` to create the first user process. Going into `userinit()`, it will then call `allocproc()` to allocate a process. After this, it will set the state of the process to `RUNNABLE`. In here, it will also set `p->context.ra` by running `forkret`. After returning to `main`, it will call `scheduler()`. Going into it, this will turn the `userinit` process to `RUNNING` state and will switch to the process using `swtch()`. After this, it will go back to what we got in `forkret` and will then run `prepare_return()` to switch back to user mode. Since the process is now in user mode, it will then execute `init` \ \ The flow of code will be as follows:
+      `main` -> `userinit` -> `allocproc` -> `scheduler` -> `swtch` -> `forkret` -> `prepare_return` -> `init`] 
+      #showybox(frame: (body-color: luma(80%)))[
+      #figure(
+        image("assets/1a/1.png", width: 50%),
+        caption: [Relevant code snippet 1 (`main` in `main.c`)]
+      )
+      #figure(
+        image("assets/1a/2.png", width: 50%),
+        caption: [Relevant code snippet 2 (`userinit` in `proc.c`)]
+      )
+      #figure(
+        image("assets/1a/3.png", width: 50%),
+        caption: [Relevant code snippet 3 (`forkret` in `proc.c`)]
+      )
+      #figure(
+        image("assets/1a/4.png", width: 50%),
+        caption: [Relevant code snippet 4 (`scheduler` in `main.c`)]
+      )]
+      #showybox(frame: (body-color: luma(80%)))[
+      #figure(
+        image("assets/1a/5.png", width: 50%),
+        caption: [Relevant code snippet 5 (`scheduler` in `proc.c`)]
+      )
+      #figure(
+        image("assets/1a/6.png", width: 50%),
+        caption: [Relevant code snippet 6 (`forkret` in `proc.c`)]
+      )
+    ]
   ][
     Explain why it is important for `exit` to wake a possibly sleeping process up.
+    #showybox(frame: (body-color: luma(80%)))[
+      *Answer:* It is important for `exit` to wake a possibly sleeping process up because the parent process might be sleeping while waiting for the child to terminate. The parent process will be in `wait()` and will be in `SLEEPING` state. If the child process calls `exit()`, it will have to wake up the parent process so that it can continue its execution and properly handle the termination of the child process. 
+      #figure(
+        image("assets/1b/1.png", width: 50%),
+        caption: [Relevant code snippet 1 (`exit` in `proc.c`)]
+      )]
   ][
     Explain what happens when a child process calls `exit`, but the parent process does not call `wait` and why this situation must be avoided.
+
+    #showybox(frame: (body-color: luma(80%)))[
+      *Answer:* When a child process calls `exit`, but the parent process does not call `wait`, the child process will stay in `ZOMBIE` state. This means that the process we want to exit is already done, but it is still there. This means that the parent process will not be able to know that the child process is already done and clean up. This must be avoided because it could lead to memory problems. Even though the process is already done, it is still in memory.
+      #figure(
+        image("assets/1c/1.png", width: 50%),
+        caption: [Relevant code snippet 1 (`exit` in `proc.c`)]
+      )]
   ][
     The `kill` syscall allows a process to terminate another process using its PID. Despite this, the `kill` function in `kernel/proc.c` simply sets the value of the `killed` field of the target process to `1`. \
     Explain how setting `killed` to `1` results in the associated process being terminated. Your explanation is expected to relate this termination mechanism to context switching.
+
+    #showybox(frame: (body-color: luma(80%)))[
+      *Answer:* Setting `killed` to `1` will not immediately terminate the process. Instead, it will mark the process as killed. In the next context switch, whenever it calls `usertrap`, it will check if the process is killed. If it is it will call `exit(-1)` to finally terminate the process.
+      
+      #figure(
+        image("assets/1d/1.png", width: 50%),
+        caption: [Relevant code snippet 1 (`usertrap` in `trap.c`)]
+      )
+      ]
   ][
     Go through the code of the xv6 shell may be found in `user/sh.c` and explain using `fork`, `exec`, and `wait` how:
     
