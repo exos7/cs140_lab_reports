@@ -107,6 +107,18 @@
   Regarding the change described in Section 2.2 regarding the syscalls invoked on startup, show all relevant changes made (with corresponding filename) via code screenshots or snippets, and briefly describe what each change does.
   \
   Additionally, take a screenshot of the output introduced by your changes when starting xv6 up, and annotate it so it shows the syscall name of each syscall number shown (you may also print the name programmatically). Ensure the name of the invoking process is shown per syscall.
+  #showybox(frame: (body-color: luma(80%)))[
+    *Answer:* #figure(
+    image("assets/item2 1.png", width: 50%),
+    caption: [`syscall.c` change]
+  )
+
+  #figure(
+    image("assets/item2 2.png", width: 50%),
+    caption: [change output]
+  )
+  ]
+
 ][ // 3
   Show the screenshot taken in Section 2.3.2, compare it with the output of the same command in Section 2.3.1, then explain why running `hello` causes the output discrepancy.
 
