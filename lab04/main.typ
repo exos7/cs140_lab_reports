@@ -83,21 +83,52 @@
     ][
       `sh` is able to continue execution when `ls` ends
     ]
+
+    #showybox(frame: (body-color: luma(80%)))[
+      *Answer:* When we type `ls`, the shell will first call `fork1()` to create a new process. The new process will then go to `runcmd()`. In there, it will go to `case EXEC` and will call `exec()`. This will replace the process with the implementation of `ls`. The parent process will then go to `wait()` and wait for the child process (the one running `ls`) to finish. When the child process finishes, it will call `exit()` and will go to `wait()` in the parent process. This will then return and the shell will continue its execution.
+
+      #figure(
+        image("assets/1e/1.png", width: 50%),
+        caption: [Relevant code snippet 1 (`main` in `sh.c`)]
+      )
+
+      #figure(
+        image("assets/1e/2.png", width: 50%),
+        caption: [Relevant code snippet 2 (`runcmd` in `sh.c`)]
+      )
+    ]
   ]
 ][ // 2
   Create a user progam `user/formbomb.c` with the code in Code Block 1, run xv6 via `CPUS=1 make qemu`, execute `forkbomb`, and observe its behavior. Commit all changes made related to this item.
-  #enum[
-    Explain what the code in Code Block 1 does and how it is recursive in nature.
+  #enum(numbering: "a")[
+    Explain what the code in Code Block 1 does and how it is recursive in nature. #showybox(frame: (body-color: luma(80%)))[
+      *Answer:* The code in Code Block 1 calls `fork()` in an infinite loop. The first `fork()` will create a child process, then both the parent and child will execute a new `forkbomb` process which will then again call `fork()`.
+    ]
   ][
-    Describe the output of running `forkbomb`, how it affects the process table, adn why it goes on indefinitely.
+    Describe the output of running `forkbomb`, how it affects the process table, and why it goes on indefinitely. #showybox(frame: (body-color: luma(80%)))[
+    *Answer:*  \
+    The output of running `forkbomb` are continuous lines of `fork failed for PID #`, where the number is increasing. This is because the process table is getting filled more and more because of `fork()`. It goes indefinitely since there is no condition to stop the loop like `wait()` or `exit()`.
   ]
-  #showybox(frame: (body-color: luma(80%)))[
-    *Answer:*
   ]
+  
 ][ // 3
   Draw a state diagram where there is a one-to-one mapping between states in the diagram and the six xv6 process states with state transition containing the name of the xv6 kernel function that performs the corresponding state change (i.e, which function containts `p->state = PROCESS_STATE_HERE)`.\
   If there are multiple xv6 functions resulting in the same transition, use a single arrow with all function names separated by commas as its label (e.g, `f1`, `f2`).
+
+  #figure(
+    image("assets/cs140lab04_3.drawio.png", width: 70%),
+    caption: [State diagram of xv6 process states]
+  )
 ][ // 4
   The xv6 implementation of `fork` has the invoking process continue execution after invoking `fork`. Modify xv6 such that calling `fork` instead causes a context switch to the next available process right after the process control block of the child process has been initialized.\
   Show all relevant changes made (with corresponding filename) via code screenshots or snippets, and briefly describe what each change does. Ensure that your changes are properly commited and pushed to your Github Classroom repository
+
+  #showybox(frame: (body-color: luma(80%)))[
+    *Answer:* In order to make `fork` switch to the next available process right after the child process has been initialized, I added a call to `yield()` at the end of the `fork()` function. This will cause the current process to yield the CPU and allow the scheduler to pick the next process to run.
+
+    #figure(
+      image("assets/4.png", width: 50%),
+      caption: [Relevant code snippet 1 (`fork` in `proc.c`)]
+    )
+  ]
 ]
